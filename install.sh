@@ -52,7 +52,8 @@ log "Detected $OS_NAME $OS_VERSION"
 log "Creating configuration directories..."
 mkdir -p ~/.config/zsh
 mkdir -p ~/.config/zsh/scripts
-mkdir -p ~/.local/share/zsh/{logs,backups}
+mkdir -p ~/.local/share/zsh/{logs,backups,cache}
+mkdir -p ~/.cache/zsh
 
 # Install dependencies
 log "Installing dependencies..."
@@ -68,6 +69,11 @@ case "$OS_NAME" in
             bash-completion \
             tar \
             unzip \
+            fzf \
+            ripgrep \
+            fd-find \
+            htop \
+            neofetch \
             || error "Failed to install dependencies"
         ;;
     "macOS")
@@ -80,6 +86,11 @@ case "$OS_NAME" in
             git \
             zsh \
             bash-completion \
+            fzf \
+            ripgrep \
+            fd \
+            htop \
+            neofetch \
             || error "Failed to install dependencies"
         ;;
 esac
@@ -97,6 +108,13 @@ log "Installing Starship prompt..."
 if ! command -v starship >/dev/null 2>&1; then
     curl -sS https://starship.rs/install.sh | sh -s -- -y \
         || error "Failed to install Starship"
+fi
+
+# Install z (directory jumper)
+log "Installing z..."
+if [[ ! -f /usr/local/etc/profile.d/z.sh ]]; then
+    curl -sL https://raw.githubusercontent.com/rupa/z/master/z.sh > /tmp/z.sh
+    sudo mv /tmp/z.sh /usr/local/etc/profile.d/z.sh
 fi
 
 # Copy configuration files
@@ -139,6 +157,11 @@ fi
 log "Creating initial backup..."
 ~/.config/zsh/50-backup.zsh \
     || warn "Failed to create initial backup"
+
+# Initialize fzf
+log "Initializing fzf..."
+$(brew --prefix)/opt/fzf/install --key-bindings --completion --no-update-rc \
+    || warn "Failed to initialize fzf"
 
 log "✅ Installation complete!"
 echo -e "\nPlease restart your terminal or run:"
