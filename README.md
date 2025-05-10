@@ -12,6 +12,7 @@ A blazing fast, beautifully designed, and feature-rich ZSH configuration that co
 - Clean and informative welcome message
 - Consistent styling across all tools
 - Subtle animations and transitions
+- Command usage analytics with beautiful visualizations
 
 ### ⚡ Performance
 - Optimized plugin loading with Antigen caching
@@ -19,6 +20,7 @@ A blazing fast, beautifully designed, and feature-rich ZSH configuration that co
 - Efficient command execution
 - Smart history handling
 - Optimized completion system
+- Command execution time tracking
 
 ### 🛠️ Modern Tools
 - Fuzzy finding with `fzf`
@@ -106,6 +108,7 @@ print_welcome() {
 - `si`: Show system information
 - `ua`: Update system packages
 - `clean`: Clean up system
+- `zsh-analytics`: View command usage statistics and analytics
 
 ### Git
 - `g`: Git command
@@ -134,7 +137,24 @@ print_welcome() {
 - `.config/zsh/20-starship.zsh`: Prompt configuration
 - `.config/zsh/30-performance.zsh`: Performance optimizations
 - `.config/zsh/40-colors.zsh`: Color schemes
+- `.config/zsh/40-functions.zsh`: Custom functions and utilities
 - `.config/zsh/50-welcome.zsh`: Welcome message
+- `.config/zsh/scripts/zsh-analytics`: Command usage analytics script
+
+## 📊 Analytics
+
+The configuration includes a powerful analytics system that tracks:
+- Command usage frequency
+- Command execution times
+- Most used commands
+- Command patterns and trends
+
+To view your command analytics, simply run:
+```bash
+zsh-analytics
+```
+
+This will display a beautiful visualization of your command usage patterns and statistics.
 
 ## 🤝 Contributing
 

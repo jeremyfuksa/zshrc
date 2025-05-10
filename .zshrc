@@ -79,5 +79,26 @@ if [[ -f ~/.config/zsh/local.zsh ]]; then
     source_file ~/.config/zsh/local.zsh
 fi
 
+# Analytics integration
+if [[ -f ~/.config/zsh/scripts/zsh-analytics ]]; then
+    # Log shell startup time
+    zsh-analytics log_shell_startup "$(($(date +%s%N) - ${START_TIME:-0}))"
+    
+    # Log directory changes
+    function chpwd() {
+        zsh-analytics log_directory_usage "$PWD"
+    }
+    
+    # Log alias usage
+    function alias() {
+        if [[ $# -eq 0 ]]; then
+            builtin alias
+        else
+            zsh-analytics log_alias_usage "$1"
+            builtin alias "$@"
+        fi
+    }
+fi
+
 # Print welcome message
 echo "✨ ZSH configuration loaded successfully!" 
