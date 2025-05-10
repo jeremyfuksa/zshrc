@@ -1,168 +1,87 @@
-#!/usr/bin/env bash
-set -e
+#!/bin/bash
 
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-NC='\033[0m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
 
-# Log function
-log() {
-    echo -e "${GREEN}[INFO]${NC} $1"
-}
-
-error() {
-    echo -e "${RED}[ERROR]${NC} $1"
-    exit 1
-}
-
-warn() {
-    echo -e "${YELLOW}[WARN]${NC} $1"
+# Print with color
+print_color() {
+    echo -e "${2}${1}${NC}"
 }
 
 # Check if running as root
-if [[ $EUID -eq 0 ]]; then
-    error "This script should not be run as root"
+if [ "$EUID" -eq 0 ]; then
+    print_color "Please do not run as root" "$RED"
+    exit 1
 fi
 
-# Detect OS
-case "$(uname)" in
-    "Linux")
-        if [[ -f /etc/os-release ]]; then
-            . /etc/os-release
-            OS_NAME="$NAME"
-            OS_VERSION="$VERSION_ID"
-        else
-            error "Could not detect Linux distribution"
-        fi
-        ;;
-    "Darwin")
-        OS_NAME="macOS"
-        OS_VERSION="$(sw_vers -productVersion)"
-        ;;
-    *)
-        error "Unsupported operating system"
-        ;;
-esac
+# Check for required commands
+check_command() {
+    if ! command -v "$1" &> /dev/null; then
+        print_color "Required command '$1' not found. Please install it first." "$RED"
+        exit 1
+    fi
+}
 
-log "Detected $OS_NAME $OS_VERSION"
+# Check required commands
+print_color "Checking required commands..." "$BLUE"
+check_command "zsh"
+check_command "git"
+check_command "curl"
 
 # Create necessary directories
-log "Creating configuration directories..."
-mkdir -p ~/.config/zsh
-mkdir -p ~/.config/zsh/scripts
-mkdir -p ~/.local/share/zsh/{logs,backups,cache}
-mkdir -p ~/.cache/zsh
+print_color "Creating directories..." "$BLUE"
+mkdir -p ~/.config/zsh/{scripts,platform}
+mkdir -p ~/.config/starship
 
-# Install dependencies
-log "Installing dependencies..."
-case "$OS_NAME" in
-    "Ubuntu"|"Debian GNU/Linux"|"Raspberry Pi OS")
-        sudo apt update
-        sudo apt install -y \
-            curl \
-            git \
-            zsh \
-            lsb-release \
-            lm-sensors \
-            bash-completion \
-            tar \
-            unzip \
-            fzf \
-            ripgrep \
-            fd-find \
-            htop \
-            neofetch \
-            || error "Failed to install dependencies"
-        ;;
-    "macOS")
-        if ! command -v brew >/dev/null 2>&1; then
-            log "Installing Homebrew..."
-            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-        fi
-        brew install \
-            curl \
-            git \
-            zsh \
-            bash-completion \
-            fzf \
-            ripgrep \
-            fd \
-            htop \
-            neofetch \
-            || error "Failed to install dependencies"
-        ;;
-esac
-
-# Install Antigen
-log "Installing Antigen..."
-if [[ ! -f "$HOME/.antigen/init.zsh" ]]; then
-    mkdir -p "$HOME/.antigen"
-    curl -sL https://git.io/antigen > "$HOME/.antigen/init.zsh" \
-        || error "Failed to install Antigen"
-fi
-
-# Install Starship
-log "Installing Starship prompt..."
-if ! command -v starship >/dev/null 2>&1; then
-    curl -sS https://starship.rs/install.sh | sh -s -- -y \
-        || error "Failed to install Starship"
-fi
-
-# Install z (directory jumper)
-log "Installing z..."
-if [[ ! -f /usr/local/etc/profile.d/z.sh ]]; then
-    curl -sL https://raw.githubusercontent.com/rupa/z/master/z.sh > /tmp/z.sh
-    sudo mv /tmp/z.sh /usr/local/etc/profile.d/z.sh
+# Backup existing configuration
+if [ -f ~/.zshrc ]; then
+    print_color "Backing up existing .zshrc..." "$YELLOW"
+    cp ~/.zshrc ~/.zshrc.bak
+    print_color "Backup created at ~/.zshrc.bak" "$GREEN"
 fi
 
 # Copy configuration files
-log "Copying configuration files..."
-cp -r .config/zsh/* ~/.config/zsh/ \
-    || error "Failed to copy configuration files"
+print_color "Installing configuration files..." "$BLUE"
+cp -r .config/zsh/* ~/.config/zsh/
+cp .zshrc ~/.zshrc
+
+# Install Starship prompt
+if ! command -v starship &> /dev/null; then
+    print_color "Installing Starship prompt..." "$BLUE"
+    curl -sS https://starship.rs/install.sh | sh
+fi
+
+# Install Antigen
+if [ ! -d ~/.antigen ]; then
+    print_color "Installing Antigen..." "$BLUE"
+    git clone https://github.com/zsh-users/antigen.git ~/.antigen
+fi
 
 # Make scripts executable
-log "Making scripts executable..."
-chmod +x ~/.config/zsh/scripts/* \
-    || warn "Failed to make scripts executable"
+print_color "Setting up scripts..." "$BLUE"
+chmod +x ~/.config/zsh/scripts/*
 
 # Create symlinks for scripts
-log "Creating script symlinks..."
-for script in ~/.config/zsh/scripts/*; do
-    if [[ -x "$script" ]]; then
-        script_name=$(basename "$script")
-        sudo ln -sf "$script" "/usr/local/bin/$script_name" \
-            || warn "Failed to create symlink for $script_name"
-    fi
-done
+print_color "Creating symlinks..." "$BLUE"
+sudo ln -sf ~/.config/zsh/scripts/zsh-help /usr/local/bin/zsh-help
 
-# Set up .zshrc
-log "Setting up .zshrc..."
-if [[ -f ~/.zshrc ]]; then
-    mv ~/.zshrc ~/.zshrc.bak
-    warn "Backed up existing .zshrc to .zshrc.bak"
-fi
-ln -s ~/.config/zsh/.zshrc ~/.zshrc \
-    || error "Failed to create .zshrc symlink"
-
-# Set default shell to zsh
-if [[ "$SHELL" != "$(which zsh)" ]]; then
-    log "Setting default shell to zsh..."
-    chsh -s "$(which zsh)" \
-        || warn "Failed to set default shell to zsh"
+# Set ZSH as default shell
+if [ "$SHELL" != "$(which zsh)" ]; then
+    print_color "Setting ZSH as default shell..." "$BLUE"
+    chsh -s "$(which zsh)"
 fi
 
-# Create initial backup
-log "Creating initial backup..."
-~/.config/zsh/50-backup.zsh \
-    || warn "Failed to create initial backup"
-
-# Initialize fzf
-log "Initializing fzf..."
-$(brew --prefix)/opt/fzf/install --key-bindings --completion --no-update-rc \
-    || warn "Failed to initialize fzf"
-
-log "✅ Installation complete!"
-echo -e "\nPlease restart your terminal or run:"
-echo -e "  ${YELLOW}exec zsh${NC}" 
+# Final message
+print_color "\nInstallation complete! 🎉" "$GREEN"
+print_color "Please restart your terminal or run 'exec zsh' to apply changes." "$YELLOW"
+print_color "\nAvailable commands:" "$BLUE"
+print_color "  - zsh-help: Show available commands and features" "$GREEN"
+print_color "  - sysinfo: Display system information" "$GREEN"
+print_color "  - docker-manage: Manage Docker containers" "$GREEN"
+print_color "  - nginx-manage: Manage Nginx sites" "$GREEN"
+print_color "\nFor more information, visit:" "$BLUE"
+print_color "https://github.com/yourusername/zsh-hot-rod" "$GREEN" 

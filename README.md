@@ -1,88 +1,152 @@
-# 🚀 Enhanced ZSHRC Modular Setup
+# 🚀 zsh-hot-rod
 
-A robust, maintainable, and cross-platform zsh configuration system that works across Ubuntu, Debian, and Raspberry Pi OS.
+A blazing fast, beautifully designed, and feature-rich ZSH configuration that combines the power of Antigen and Starship with professional aesthetics and modern functionality.
 
-## 🌟 Features
+![zsh-hot-rod](https://i.imgur.com/example.png)
 
-- **Modular Structure**: Easy to maintain and extend
-- **Cross-Platform**: Works on Ubuntu, Debian, and Raspberry Pi OS
-- **Plugin Management**: Robust Antigen-based plugin system with error logging
-- **Version Control**: Built-in backup and restore functionality
-- **Platform Detection**: Automatic platform-specific configurations
-- **Enhanced Functions**: Useful utilities for system management
-- **Improved Keybindings**: Better terminal navigation and editing
+## ✨ Features
 
-## 📁 Directory Structure
+### 🎨 Beautiful Design
+- Professional color scheme based on Catppuccin
+- Elegant prompt with Starship
+- Clean and informative welcome message
+- Consistent styling across all tools
+- Subtle animations and transitions
 
+### ⚡ Performance
+- Optimized plugin loading with Antigen caching
+- Fast startup time
+- Efficient command execution
+- Smart history handling
+- Optimized completion system
+
+### 🛠️ Modern Tools
+- Fuzzy finding with `fzf`
+- Fast file search with `fd`
+- Quick code search with `ripgrep`
+- Smart directory jumping with `z`
+- Enhanced process management with `htop`
+
+### 🔧 Development Features
+- Git integration with beautiful status display
+- Syntax highlighting for multiple languages
+- Smart command suggestions
+- Alias tips and suggestions
+- Auto environment loading
+
+### 🎯 Productivity
+- Intelligent command history
+- Directory stack navigation
+- Smart tab completion
+- Command syntax highlighting
+- Git command shortcuts
+
+## 🚀 Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/zsh-hot-rod.git ~/.config/zsh
+
+# Run the installation script
+cd ~/.config/zsh
+./install.sh
 ```
-~/.zshrc                        # Main loader
-~/.config/zsh/
-├── 00-colors.zsh              # Color constants
-├── 05-platform.zsh            # Platform-specific configurations
-├── 10-env.zsh                 # Environment setup (NVM, Starship, etc.)
-├── 20-antigen.zsh             # Antigen plugin management
-├── 30-aliases.zsh             # Common aliases
-├── 40-functions.zsh           # Utility functions
-├── 50-backup.zsh              # Backup and restore functions
-├── 90-functions.zsh           # System management functions
-└── 99-keybindings.zsh         # Enhanced keybindings
+
+## 🎨 Customization
+
+### Colors
+The color scheme can be customized in `.config/zsh/40-colors.zsh`:
+```zsh
+# Professional color scheme for ls
+export LS_COLORS="di=34;40:ln=35;40:so=32;40:pi=33;40:ex=31;40:bd=34;46:cd=34;43:su=30;41:sg=30;46:tw=30;42:ow=30;43"
 ```
 
-## 🚀 Quick Start
+### Prompt
+Customize your prompt in `.config/zsh/20-starship.zsh`:
+```toml
+format = """
+$directory\
+$git_branch\
+$git_status\
+$cmd_duration\
+$line_break\
+$character"""
+```
 
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/yourusername/zshrc.git ~/.config/zsh
-   ```
+### Welcome Message
+Modify the welcome message in `.config/zsh/50-welcome.zsh`:
+```zsh
+print_welcome() {
+    # Customize system information display
+}
+```
 
-2. Run the bootstrap script:
-   ```bash
-   bash ~/.config/zsh/install.sh
-   ```
+## 📦 Dependencies
 
-3. Restart your shell:
-   ```bash
-   exec zsh
-   ```
+- ZSH 5.8 or later
+- Antigen
+- Starship
+- fzf
+- ripgrep
+- fd
+- htop
+- neofetch
 
-## 🔧 Requirements
+## 🎯 Key Bindings
 
-The bootstrap script will install these dependencies:
-- curl
-- git
-- zsh
-- lsb-release
-- lm-sensors
-- bash-completion
+- `Ctrl + R`: Fuzzy history search
+- `Ctrl + Space`: Accept autosuggestion
+- `Alt + C`: Fuzzy directory change
+- `Alt + F`: Fuzzy file finder
+- `Ctrl + T`: Fuzzy file search
 
-## 📦 Optional Dependencies
+## 🛠️ Available Commands
 
-- NVM (Node Version Manager)
-- Starship Prompt
-- Antigen (Plugin Manager)
+### System
+- `si`: Show system information
+- `ua`: Update system packages
+- `clean`: Clean up system
 
-## 🔄 Usage
+### Git
+- `g`: Git command
+- `ga`: Git add
+- `gc`: Git commit
+- `gp`: Git push
+- `gpl`: Git pull
+- `gs`: Git status
+- `gd`: Git diff
+- `gl`: Git log
+- `gb`: Git branch
+- `gco`: Git checkout
 
-- `reload` - Reload zsh configuration
-- `backup-zsh` - Backup your zsh configuration
-- `restore-zsh` - Restore from backup
-- `update-all` - Update system packages
-- `install` - Quick package installation
-- `docker-ls` - List Docker containers
-- `ngensite` - Enable Nginx site
-- `ngdissite` - Disable Nginx site
+### Directory Navigation
+- `..`: Go up one directory
+- `...`: Go up two directories
+- `z <dir>`: Jump to frequent directory
 
-## 🛠️ Customization
+### Process Management
+- `psg <pattern>`: Search for processes
+- `kp <name>`: Kill process by name
 
-1. Edit files in `~/.config/zsh/` to customize your setup
-2. Add your own functions to `40-functions.zsh`
-3. Modify aliases in `30-aliases.zsh`
-4. Add platform-specific settings in `05-platform.zsh`
+## 🔧 Configuration Files
 
-## 📝 License
-
-MIT License - feel free to use and modify for your needs.
+- `.config/zsh/10-antigen.zsh`: Plugin management
+- `.config/zsh/20-starship.zsh`: Prompt configuration
+- `.config/zsh/30-performance.zsh`: Performance optimizations
+- `.config/zsh/40-colors.zsh`: Color schemes
+- `.config/zsh/50-welcome.zsh`: Welcome message
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request. 
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- [Antigen](https://github.com/zsh-users/antigen)
+- [Starship](https://starship.rs)
+- [Catppuccin](https://github.com/catppuccin/catppuccin)
+- [zsh-users](https://github.com/zsh-users) 

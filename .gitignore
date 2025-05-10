@@ -1,0 +1,34 @@
+# ZSH specific
+.zcompdump*
+.zsh_history
+.zsh_sessions
+.zshrc.bak
+.zshrc.zwc
+.antigen/.cache
+.antigen/.zcompdump*
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Log files
+*.log
+logs/
+
+# Cache directories
+.cache/
+__pycache__/
+
+# Local configuration
+local.zsh
+platform/*.zsh
+
+# Temporary files
+*.swp
+*.swo
+*# 
