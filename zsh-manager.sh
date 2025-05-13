@@ -81,6 +81,11 @@ check_requirements() {
     return 0
 }
 
+# Function to get latest Starship version
+get_latest_starship_version() {
+    curl -s https://api.github.com/repos/starship/starship/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'
+}
+
 # Function to check current setup
 check_setup() {
     print_color "\n🔍 Checking current setup..." "$BLUE"
@@ -97,7 +102,15 @@ check_setup() {
     # Check Starship
     if command_exists starship; then
         print_color "✓ Starship is installed" "$GREEN"
-        print_color "  Version: $(starship --version)" "$CYAN"
+        local current_version=$(starship --version | cut -d' ' -f2)
+        local latest_version=$(get_latest_starship_version)
+        print_color "  Current version: $current_version" "$CYAN"
+        print_color "  Latest version: $latest_version" "$CYAN"
+        if [ "$current_version" = "$latest_version" ]; then
+            print_color "  ✓ Starship is up to date" "$GREEN"
+        else
+            print_color "  ⚠️  Starship update available" "$YELLOW"
+        fi
     else
         print_color "❌ Starship is not installed" "$RED"
     fi
@@ -146,6 +159,9 @@ install() {
         return 1
     fi
     
+    # Get the directory where the script is located
+    SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+    
     # Create necessary directories
     print_color "Creating directories..." "$BLUE"
     mkdir -p ~/.config/zsh
@@ -161,14 +177,27 @@ install() {
     
     # Copy configuration files
     print_color "Installing configuration files..." "$BLUE"
-    cp -r .config/zsh/* ~/.config/zsh/
-    cp .zshrc ~/.zshrc
+    if [ -d "$SCRIPT_DIR/.config/zsh" ]; then
+        cp -r "$SCRIPT_DIR/.config/zsh/"* ~/.config/zsh/
+    else
+        print_color "❌ Source directory not found: $SCRIPT_DIR/.config/zsh" "$RED"
+        return 1
+    fi
+    
+    if [ -f "$SCRIPT_DIR/.zshrc" ]; then
+        cp "$SCRIPT_DIR/.zshrc" ~/.zshrc
+    else
+        print_color "❌ Source file not found: $SCRIPT_DIR/.zshrc" "$RED"
+        return 1
+    fi
     
     # Copy Starship configuration
-    if [ -f .config/starship.toml ]; then
+    if [ -f "$SCRIPT_DIR/.config/starship.toml" ]; then
         print_color "Installing Starship configuration..." "$BLUE"
-        cp .config/starship.toml ~/.config/starship.toml
+        cp "$SCRIPT_DIR/.config/starship.toml" ~/.config/starship.toml
         print_color "✓ Starship configuration installed" "$GREEN"
+    else
+        print_color "⚠️  Starship configuration not found in source" "$YELLOW"
     fi
     
     # Install Starship prompt
