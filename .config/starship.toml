@@ -15,7 +15,7 @@ disabled = true
 
 # Customize the git status module
 [git_status]
-conflicted = "🏳"
+conflicted = "--"
 ahead = "⇡${count}"
 behind = "⇣${count}"
 diverged = "⇕⇡${ahead_count}⇣${behind_count}"
