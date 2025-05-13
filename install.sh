@@ -34,8 +34,9 @@ check_command "curl"
 
 # Create necessary directories
 print_color "Creating directories..." "$BLUE"
-mkdir -p ~/.config/zsh/{scripts,platform}
+mkdir -p ~/.config/zsh
 mkdir -p ~/.config/starship
+mkdir -p ~/.local/share/zsh/logs
 
 # Backup existing configuration
 if [ -f ~/.zshrc ]; then
@@ -61,14 +62,6 @@ if [ ! -d ~/.antigen ]; then
     git clone https://github.com/zsh-users/antigen.git ~/.antigen
 fi
 
-# Make scripts executable
-print_color "Setting up scripts..." "$BLUE"
-chmod +x ~/.config/zsh/scripts/*
-
-# Create symlinks for scripts
-print_color "Creating symlinks..." "$BLUE"
-sudo ln -sf ~/.config/zsh/scripts/zsh-help /usr/local/bin/zsh-help
-
 # Set ZSH as default shell
 if [ "$SHELL" != "$(which zsh)" ]; then
     print_color "Setting ZSH as default shell..." "$BLUE"
@@ -78,10 +71,9 @@ fi
 # Final message
 print_color "\nInstallation complete! 🎉" "$GREEN"
 print_color "Please restart your terminal or run 'exec zsh' to apply changes." "$YELLOW"
-print_color "\nAvailable commands:" "$BLUE"
-print_color "  - zsh-help: Show available commands and features" "$GREEN"
-print_color "  - sysinfo: Display system information" "$GREEN"
-print_color "  - docker-manage: Manage Docker containers" "$GREEN"
-print_color "  - nginx-manage: Manage Nginx sites" "$GREEN"
-print_color "\nFor more information, visit:" "$BLUE"
-print_color "https://github.com/yourusername/zsh-hot-rod" "$GREEN" 
+print_color "\nYour ZSH configuration is now set up with:" "$BLUE"
+print_color "  - Minimal, modular configuration" "$GREEN"
+print_color "  - Starship prompt" "$GREEN"
+print_color "  - Essential plugins via Antigen" "$GREEN"
+print_color "  - Platform-specific optimizations" "$GREEN"
+print_color "  - Performance enhancements" "$GREEN" 
