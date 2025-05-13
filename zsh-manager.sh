@@ -84,6 +84,7 @@ check_requirements() {
 # Function to check current setup
 check_setup() {
     print_color "\n🔍 Checking current setup..." "$BLUE"
+    print_color "This may take a moment..." "$CYAN"
     
     # Check ZSH
     if command_exists zsh; then
@@ -104,6 +105,7 @@ check_setup() {
     # Check Antigen
     if [ -d ~/.antigen ]; then
         print_color "✓ Antigen is installed" "$GREEN"
+        print_color "  Location: ~/.antigen" "$CYAN"
     else
         print_color "❌ Antigen is not installed" "$RED"
     fi
@@ -111,12 +113,14 @@ check_setup() {
     # Check configuration files
     if [ -f ~/.config/zsh/.zshrc ]; then
         print_color "✓ ZSH configuration exists" "$GREEN"
+        print_color "  Location: ~/.config/zsh/.zshrc" "$CYAN"
     else
         print_color "❌ ZSH configuration is missing" "$RED"
     fi
     
     if [ -f ~/.config/starship.toml ]; then
         print_color "✓ Starship configuration exists" "$GREEN"
+        print_color "  Location: ~/.config/starship.toml" "$CYAN"
     else
         print_color "❌ Starship configuration is missing" "$RED"
     fi
@@ -124,9 +128,14 @@ check_setup() {
     # Check if ZSH is default shell
     if [ "$SHELL" = "$(which zsh)" ]; then
         print_color "✓ ZSH is set as default shell" "$GREEN"
+        print_color "  Current shell: $SHELL" "$CYAN"
     else
         print_color "❌ ZSH is not set as default shell" "$RED"
+        print_color "  Current shell: $SHELL" "$CYAN"
+        print_color "  Expected: $(which zsh)" "$CYAN"
     fi
+    
+    print_color "\nCheck complete! 🎉" "$GREEN"
 }
 
 # Function to install
@@ -334,13 +343,37 @@ show_help() {
     clear
     print_color "\n📚 ZSH Configuration Manager Help" "$BLUE"
     print_color "=============================" "$BLUE"
+    
+    print_color "\nThis tool helps you manage your ZSH configuration:" "$CYAN"
+    print_color "• Install and update your ZSH setup" "$CYAN"
+    print_color "• Check your current configuration" "$CYAN"
+    print_color "• Restore or remove your setup" "$CYAN"
+    
     print_color "\nAvailable commands:" "$CYAN"
     print_color "1. Check    - Verify current ZSH setup and configuration" "$GREEN"
-    print_color "2. Install  - Install or reinstall ZSH configuration" "$GREEN"
-    print_color "3. Update   - Update existing installation" "$GREEN"
-    print_color "4. Restore  - Restore previous configuration" "$YELLOW"
-    print_color "5. Purge    - Remove all ZSH-related packages and configs" "$RED"
-    print_color "6. Help     - Show this help message" "$BLUE"
+    print_color "   • Shows installed components" "$CYAN"
+    print_color "   • Displays version information" "$CYAN"
+    print_color "   • Checks configuration files" "$CYAN"
+    
+    print_color "\n2. Install  - Install or reinstall ZSH configuration" "$GREEN"
+    print_color "   • Sets up ZSH with Antigen" "$CYAN"
+    print_color "   • Configures Starship prompt" "$CYAN"
+    print_color "   • Creates necessary directories" "$CYAN"
+    
+    print_color "\n3. Update   - Update existing installation" "$GREEN"
+    print_color "   • Updates Antigen and Starship" "$CYAN"
+    print_color "   • Refreshes configuration files" "$CYAN"
+    
+    print_color "\n4. Restore  - Restore previous configuration" "$YELLOW"
+    print_color "   • Restores from backup if available" "$CYAN"
+    print_color "   • Removes current configuration" "$CYAN"
+    
+    print_color "\n5. Purge    - Remove all ZSH-related packages and configs" "$RED"
+    print_color "   • Removes ZSH and dependencies" "$CYAN"
+    print_color "   • Deletes all configuration files" "$CYAN"
+    print_color "   • Cleans up cache and logs" "$CYAN"
+    
+    print_color "\n6. Help     - Show this help message" "$BLUE"
     print_color "7. Exit     - Exit the program" "$NC"
     
     print_color "\nPress Enter to return to main menu..." "$BLUE"
