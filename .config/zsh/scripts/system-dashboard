@@ -17,12 +17,12 @@ get_os_info() {
         os_name=$(sw_vers -productName)
         os_version=$(sw_vers -productVersion)
         os_build=$(sw_vers -buildVersion)
-        echo "${BOLD}${GREEN}OS:${NC} $os_name $os_version ($os_build)"
+        echo "${BOLD}${GREEN}🖥️  OS:${NC} $os_name $os_version ($os_build)"
     else
         # Linux
         if [ -f /etc/os-release ]; then
             . /etc/os-release
-            echo "${BOLD}${GREEN}OS:${NC} $NAME $VERSION"
+            echo "${BOLD}${GREEN}🖥️  OS:${NC} $NAME $VERSION"
         fi
     fi
 }
@@ -30,10 +30,10 @@ get_os_info() {
 get_kernel_info() {
     if [[ "$OSTYPE" == "darwin"* ]]; then
         kernel=$(uname -r)
-        echo "${BOLD}${GREEN}Kernel:${NC} $kernel"
+        echo "${BOLD}${GREEN}⚙️  Kernel:${NC} $kernel"
     else
         kernel=$(uname -r)
-        echo "${BOLD}${GREEN}Kernel:${NC} $kernel"
+        echo "${BOLD}${GREEN}⚙️  Kernel:${NC} $kernel"
     fi
 }
 
@@ -41,13 +41,13 @@ get_cpu_info() {
     if [[ "$OSTYPE" == "darwin"* ]]; then
         cpu=$(sysctl -n machdep.cpu.brand_string)
         cores=$(sysctl -n hw.ncpu)
-        echo "${BOLD}${GREEN}CPU:${NC} $cpu"
-        echo "${BOLD}${GREEN}Cores:${NC} $cores"
+        echo "${BOLD}${GREEN}💻 CPU:${NC} $cpu"
+        echo "${BOLD}${GREEN}🔢 Cores:${NC} $cores"
     else
         cpu=$(grep "model name" /proc/cpuinfo | head -n1 | cut -d':' -f2 | sed 's/^[ \t]*//')
         cores=$(nproc)
-        echo "${BOLD}${GREEN}CPU:${NC} $cpu"
-        echo "${BOLD}${GREEN}Cores:${NC} $cores"
+        echo "${BOLD}${GREEN}💻 CPU:${NC} $cpu"
+        echo "${BOLD}${GREEN}🔢 Cores:${NC} $cores"
     fi
 }
 
@@ -57,12 +57,12 @@ get_memory_info() {
         used_mem=$(vm_stat | awk '/active/ {print $3}' | sed 's/\.//')
         used_mem=$(($used_mem * 4096 / 1024 / 1024 / 1024))
         free_mem=$((${total_mem%.*} - used_mem))
-        echo "${BOLD}${GREEN}Memory:${NC} ${free_mem}GB free of ${total_mem}"
+        echo "${BOLD}${GREEN}🧠 Memory:${NC} ${free_mem}GB free of ${total_mem}"
     else
         total_mem=$(free -h | awk '/^Mem:/ {print $2}')
         used_mem=$(free -h | awk '/^Mem:/ {print $3}')
         free_mem=$(free -h | awk '/^Mem:/ {print $4}')
-        echo "${BOLD}${GREEN}Memory:${NC} ${free_mem} free of ${total_mem}"
+        echo "${BOLD}${GREEN}🧠 Memory:${NC} ${free_mem} free of ${total_mem}"
     fi
 }
 
@@ -72,24 +72,24 @@ get_disk_info() {
         total=$(echo "$disk_info" | awk '{print $2}')
         used=$(echo "$disk_info" | awk '{print $3}')
         free=$(echo "$disk_info" | awk '{print $4}')
-        echo "${BOLD}${GREEN}Disk:${NC} ${free} free of ${total}"
+        echo "${BOLD}${GREEN}💾 Disk:${NC} ${free} free of ${total}"
     else
         disk_info=$(df -h / | tail -n1)
         total=$(echo "$disk_info" | awk '{print $2}')
         used=$(echo "$disk_info" | awk '{print $3}')
         free=$(echo "$disk_info" | awk '{print $4}')
-        echo "${BOLD}${GREEN}Disk:${NC} ${free} free of ${total}"
+        echo "${BOLD}${GREEN}💾 Disk:${NC} ${free} free of ${total}"
     fi
 }
 
 get_uptime() {
     uptime=$(uptime | sed 's/.*up \([^,]*\), .*/\1/')
-    echo "${BOLD}${GREEN}Uptime:${NC} $uptime"
+    echo "${BOLD}${GREEN}⏱️  Uptime:${NC} $uptime"
 }
 
 get_shell_info() {
-    echo "${BOLD}${GREEN}Shell:${NC} $SHELL"
-    echo "${BOLD}${GREEN}Terminal:${NC} $TERM"
+    echo "${BOLD}${GREEN}🐚 Shell:${NC} $SHELL"
+    echo "${BOLD}${GREEN}🖥️  Terminal:${NC} $TERM"
 }
 
 get_network_info() {
@@ -104,35 +104,35 @@ get_network_info() {
             local_ip="Not connected"
         fi
     fi
-    echo "${BOLD}${GREEN}Local IP:${NC} $local_ip"
+    echo "${BOLD}${GREEN}🌐 Local IP:${NC} $local_ip"
 }
 
 # Print system information
-echo -e "\n${BOLD}${BLUE}╔════════════════════════════════════════════════════════════╗${NC}"
-echo -e "${BOLD}${BLUE}║${NC}                    ${BOLD}${CYAN}System Dashboard${NC}                    ${BOLD}${BLUE}║${NC}"
-echo -e "${BOLD}${BLUE}╠════════════════════════════════════════════════════════════╣${NC}"
+echo -e "\n${BOLD}${BLUE}╭──────────────────────────────────────────────────────────╮${NC}"
+echo -e "${BOLD}${BLUE}│${NC}                    ${BOLD}${CYAN}✨ System Dashboard ✨${NC}                    ${BOLD}${BLUE}│${NC}"
+echo -e "${BOLD}${BLUE}├──────────────────────────────────────────────────────────┤${NC}"
 
 # System Information
-echo -e "${BOLD}${BLUE}║${NC} ${BOLD}${YELLOW}System Information:${NC}                                ${BOLD}${BLUE}║${NC}"
-echo -e "${BOLD}${BLUE}║${NC} $(get_os_info)${NC}${BOLD}${BLUE}║${NC}"
-echo -e "${BOLD}${BLUE}║${NC} $(get_kernel_info)${NC}${BOLD}${BLUE}║${NC}"
-echo -e "${BOLD}${BLUE}║${NC} $(get_uptime)${NC}${BOLD}${BLUE}║${NC}"
+echo -e "${BOLD}${BLUE}│${NC} ${BOLD}${YELLOW}📋 System Information${NC}                                ${BOLD}${BLUE}│${NC}"
+echo -e "${BOLD}${BLUE}│${NC} $(get_os_info)${NC}${BOLD}${BLUE}│${NC}"
+echo -e "${BOLD}${BLUE}│${NC} $(get_kernel_info)${NC}${BOLD}${BLUE}│${NC}"
+echo -e "${BOLD}${BLUE}│${NC} $(get_uptime)${NC}${BOLD}${BLUE}│${NC}"
 
 # Hardware Information
-echo -e "${BOLD}${BLUE}║${NC}                                                    ${BOLD}${BLUE}║${NC}"
-echo -e "${BOLD}${BLUE}║${NC} ${BOLD}${YELLOW}Hardware Information:${NC}                            ${BOLD}${BLUE}║${NC}"
-echo -e "${BOLD}${BLUE}║${NC} $(get_cpu_info)${NC}${BOLD}${BLUE}║${NC}"
-echo -e "${BOLD}${BLUE}║${NC} $(get_memory_info)${NC}${BOLD}${BLUE}║${NC}"
-echo -e "${BOLD}${BLUE}║${NC} $(get_disk_info)${NC}${BOLD}${BLUE}║${NC}"
+echo -e "${BOLD}${BLUE}│${NC}                                                    ${BOLD}${BLUE}│${NC}"
+echo -e "${BOLD}${BLUE}│${NC} ${BOLD}${YELLOW}🔧 Hardware Information${NC}                            ${BOLD}${BLUE}│${NC}"
+echo -e "${BOLD}${BLUE}│${NC} $(get_cpu_info)${NC}${BOLD}${BLUE}│${NC}"
+echo -e "${BOLD}${BLUE}│${NC} $(get_memory_info)${NC}${BOLD}${BLUE}│${NC}"
+echo -e "${BOLD}${BLUE}│${NC} $(get_disk_info)${NC}${BOLD}${BLUE}│${NC}"
 
 # Network Information
-echo -e "${BOLD}${BLUE}║${NC}                                                    ${BOLD}${BLUE}║${NC}"
-echo -e "${BOLD}${BLUE}║${NC} ${BOLD}${YELLOW}Network Information:${NC}                             ${BOLD}${BLUE}║${NC}"
-echo -e "${BOLD}${BLUE}║${NC} $(get_network_info)${NC}${BOLD}${BLUE}║${NC}"
+echo -e "${BOLD}${BLUE}│${NC}                                                    ${BOLD}${BLUE}│${NC}"
+echo -e "${BOLD}${BLUE}│${NC} ${BOLD}${YELLOW}🌐 Network Information${NC}                             ${BOLD}${BLUE}│${NC}"
+echo -e "${BOLD}${BLUE}│${NC} $(get_network_info)${NC}${BOLD}${BLUE}│${NC}"
 
 # Shell Information
-echo -e "${BOLD}${BLUE}║${NC}                                                    ${BOLD}${BLUE}║${NC}"
-echo -e "${BOLD}${BLUE}║${NC} ${BOLD}${YELLOW}Shell Information:${NC}                               ${BOLD}${BLUE}║${NC}"
-echo -e "${BOLD}${BLUE}║${NC} $(get_shell_info)${NC}${BOLD}${BLUE}║${NC}"
+echo -e "${BOLD}${BLUE}│${NC}                                                    ${BOLD}${BLUE}│${NC}"
+echo -e "${BOLD}${BLUE}│${NC} ${BOLD}${YELLOW}🐚 Shell Information${NC}                               ${BOLD}${BLUE}│${NC}"
+echo -e "${BOLD}${BLUE}│${NC} $(get_shell_info)${NC}${BOLD}${BLUE}│${NC}"
 
-echo -e "${BOLD}${BLUE}╚════════════════════════════════════════════════════════════╝${NC}\n" 
+echo -e "${BOLD}${BLUE}╰──────────────────────────────────────────────────────────╯${NC}\n" 
