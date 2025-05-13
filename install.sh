@@ -50,6 +50,13 @@ print_color "Installing configuration files..." "$BLUE"
 cp -r .config/zsh/* ~/.config/zsh/
 cp .zshrc ~/.zshrc
 
+# Copy Starship configuration
+if [ -f .config/starship.toml ]; then
+    print_color "Installing Starship configuration..." "$BLUE"
+    cp .config/starship.toml ~/.config/starship.toml
+    print_color "✓ Starship configuration installed" "$GREEN"
+fi
+
 # Install Starship prompt
 if ! command -v starship &> /dev/null; then
     print_color "Installing Starship prompt..." "$BLUE"
