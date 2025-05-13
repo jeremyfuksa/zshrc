@@ -166,6 +166,7 @@ install() {
     # Create necessary directories
     print_color "Creating directories..." "$BLUE"
     mkdir -p ~/.config/zsh
+    mkdir -p ~/.config/zsh/scripts
     mkdir -p ~/.config/starship
     mkdir -p ~/.local/share/zsh/logs
     
@@ -178,24 +179,27 @@ install() {
     
     # Copy configuration files
     print_color "Installing configuration files..." "$BLUE"
-    if [ -d "$SCRIPT_DIR/config/zsh" ]; then
-        cp -r "$SCRIPT_DIR/config/zsh/"* ~/.config/zsh/
+    if [ -d "$SCRIPT_DIR/.config/zsh" ]; then
+        cp -r "$SCRIPT_DIR/.config/zsh/"* ~/.config/zsh/
+        # Make scripts executable
+        chmod -R +x ~/.config/zsh/scripts
+        print_color "✓ Configuration files installed" "$GREEN"
     else
-        print_color "❌ Source directory not found: $SCRIPT_DIR/config/zsh" "$RED"
+        print_color "❌ Source directory not found: $SCRIPT_DIR/.config/zsh" "$RED"
         return 1
     fi
     
-    if [ -f "$SCRIPT_DIR/config/zsh/.zshrc" ]; then
-        cp "$SCRIPT_DIR/config/zsh/.zshrc" ~/.zshrc
+    if [ -f "$SCRIPT_DIR/.config/zsh/.zshrc" ]; then
+        cp "$SCRIPT_DIR/.config/zsh/.zshrc" ~/.zshrc
     else
-        print_color "❌ Source file not found: $SCRIPT_DIR/config/zsh/.zshrc" "$RED"
+        print_color "❌ Source file not found: $SCRIPT_DIR/.config/zsh/.zshrc" "$RED"
         return 1
     fi
     
     # Copy Starship configuration
-    if [ -f "$SCRIPT_DIR/config/starship.toml" ]; then
+    if [ -f "$SCRIPT_DIR/.config/starship.toml" ]; then
         print_color "Installing Starship configuration..." "$BLUE"
-        cp "$SCRIPT_DIR/config/starship.toml" ~/.config/starship.toml
+        cp "$SCRIPT_DIR/.config/starship.toml" ~/.config/starship.toml
         print_color "✓ Starship configuration installed" "$GREEN"
     else
         print_color "⚠️  Starship configuration not found in source" "$YELLOW"
@@ -248,6 +252,9 @@ update() {
     print_color "Updating configuration files..." "$BLUE"
     if [ -d "$SCRIPT_DIR/.config/zsh" ]; then
         cp -r "$SCRIPT_DIR/.config/zsh/"* ~/.config/zsh/
+        # Make scripts executable
+        chmod -R +x ~/.config/zsh/scripts
+        print_color "✓ Configuration files updated" "$GREEN"
     else
         print_color "❌ Source directory not found: $SCRIPT_DIR/.config/zsh" "$RED"
         return 1
