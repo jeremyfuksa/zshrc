@@ -13,7 +13,7 @@ ZSH_LOG_FILE="$ZSH_LOG_DIR/zsh.log"
 
 # Log function
 log() {
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" >> "$ZSH_LOG_FILE"
+    echo "[$(date '+%Y-%m-%d %H:%M:%S' 2>/dev/null || echo 'unknown')] $1" >> "$ZSH_LOG_FILE"
 }
 
 # Source a file with error handling
@@ -33,11 +33,10 @@ for file in ~/.config/zsh/*.zsh; do
 done
 
 # Clean up old log files (keep last 7 days)
-find "$ZSH_LOG_DIR" -name "*.log" -mtime +7 -delete
+find "$ZSH_LOG_DIR" -name "*.log" -mtime +7 -delete 2>/dev/null || true
 
-# Set default editor
-export EDITOR='vim'
-export VISUAL='vim'
+# Basic PATH setup
+export PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
 
 # History settings
 HISTSIZE=10000
@@ -55,8 +54,9 @@ compinit
 autoload -Uz colors
 colors
 
-# Enable prompt expansion
-setopt PROMPT_SUBST
+# Set default editor
+export EDITOR='vim'
+export VISUAL='vim'
 
 # Enable directory stack
 setopt AUTO_PUSHD
@@ -68,6 +68,26 @@ setopt EXTENDED_GLOB
 
 # Enable interactive comments
 setopt INTERACTIVE_COMMENTS
+
+# Load Antigen
+source /usr/local/share/antigen/antigen.zsh
+
+# Load the oh-my-zsh's library
+antigen use oh-my-zsh
+
+# Bundles from the default repo (robbyrussell's oh-my-zsh)
+antigen bundle git
+antigen bundle zsh-users/zsh-autosuggestions
+antigen bundle zsh-users/zsh-syntax-highlighting
+
+# Load the theme
+antigen theme robbyrussell
+
+# Tell Antigen that you're done
+antigen apply
+
+# Initialize Starship
+eval "$(starship init zsh)"
 
 # Load platform-specific settings if they exist
 if [[ -f ~/.config/zsh/platform/$(uname).zsh ]]; then
