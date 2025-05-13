@@ -108,31 +108,31 @@ get_network_info() {
 }
 
 # Print system information
-echo -e "\n${BOLD}${BLUE}╭──────────────────────────────────────────────────────────╮${NC}"
-echo -e "${BOLD}${BLUE}│${NC}                    ${BOLD}${CYAN}✨ System Dashboard ✨${NC}                    ${BOLD}${BLUE}│${NC}"
-echo -e "${BOLD}${BLUE}├──────────────────────────────────────────────────────────┤${NC}"
+echo -e "\n${BOLD}${CYAN}✨ System Dashboard ✨${NC}"
+echo -e "${BOLD}${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
 
 # System Information
-echo -e "${BOLD}${BLUE}│${NC} ${BOLD}${YELLOW}📋 System Information${NC}                                ${BOLD}${BLUE}│${NC}"
-echo -e "${BOLD}${BLUE}│${NC} $(get_os_info)${NC}${BOLD}${BLUE}│${NC}"
-echo -e "${BOLD}${BLUE}│${NC} $(get_kernel_info)${NC}${BOLD}${BLUE}│${NC}"
-echo -e "${BOLD}${BLUE}│${NC} $(get_uptime)${NC}${BOLD}${BLUE}│${NC}"
+echo -e "${BOLD}${YELLOW}📋 System Information${NC}"
+echo -e "$(get_os_info)"
+echo -e "$(get_kernel_info)"
+echo -e "$(get_uptime)"
+echo
 
 # Hardware Information
-echo -e "${BOLD}${BLUE}│${NC}                                                    ${BOLD}${BLUE}│${NC}"
-echo -e "${BOLD}${BLUE}│${NC} ${BOLD}${YELLOW}🔧 Hardware Information${NC}                            ${BOLD}${BLUE}│${NC}"
-echo -e "${BOLD}${BLUE}│${NC} $(get_cpu_info)${NC}${BOLD}${BLUE}│${NC}"
-echo -e "${BOLD}${BLUE}│${NC} $(get_memory_info)${NC}${BOLD}${BLUE}│${NC}"
-echo -e "${BOLD}${BLUE}│${NC} $(get_disk_info)${NC}${BOLD}${BLUE}│${NC}"
+echo -e "${BOLD}${YELLOW}🔧 Hardware Information${NC}"
+echo -e "$(get_cpu_info)"
+echo -e "$(get_memory_info)"
+echo -e "$(get_disk_info)"
+echo
 
 # Network Information
-echo -e "${BOLD}${BLUE}│${NC}                                                    ${BOLD}${BLUE}│${NC}"
-echo -e "${BOLD}${BLUE}│${NC} ${BOLD}${YELLOW}🌐 Network Information${NC}                             ${BOLD}${BLUE}│${NC}"
-echo -e "${BOLD}${BLUE}│${NC} $(get_network_info)${NC}${BOLD}${BLUE}│${NC}"
+echo -e "${BOLD}${YELLOW}🌐 Network Information${NC}"
+echo -e "$(get_network_info)"
+echo
 
 # Shell Information
-echo -e "${BOLD}${BLUE}│${NC}                                                    ${BOLD}${BLUE}│${NC}"
-echo -e "${BOLD}${BLUE}│${NC} ${BOLD}${YELLOW}🐚 Shell Information${NC}                               ${BOLD}${BLUE}│${NC}"
-echo -e "${BOLD}${BLUE}│${NC} $(get_shell_info)${NC}${BOLD}${BLUE}│${NC}"
+echo -e "${BOLD}${YELLOW}🐚 Shell Information${NC}"
+echo -e "$(get_shell_info)"
+echo
 
-echo -e "${BOLD}${BLUE}╰──────────────────────────────────────────────────────────╯${NC}\n" 
+echo -e "${BOLD}${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n" 
