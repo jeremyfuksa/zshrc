@@ -17,6 +17,26 @@ command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
+# Function to fix script permissions
+fix_permissions() {
+    print_color "Fixing script permissions..." "$BLUE"
+    
+    # Make sure scripts directory exists
+    mkdir -p "$HOME/.config/zsh/scripts"
+    
+    # Fix permissions for all scripts
+    if [ -d "$HOME/.config/zsh/scripts" ]; then
+        chmod -R +x "$HOME/.config/zsh/scripts"
+        print_color "✓ Script permissions fixed" "$GREEN"
+    fi
+    
+    # Specifically fix system-dashboard permissions
+    if [ -f "$HOME/.config/zsh/scripts/system-dashboard" ]; then
+        chmod +x "$HOME/.config/zsh/scripts/system-dashboard"
+        print_color "✓ System dashboard permissions fixed" "$GREEN"
+    fi
+}
+
 # Function to update Starship
 update_starship() {
     print_color "Updating Starship prompt..." "$BLUE"
@@ -67,15 +87,19 @@ update_zsh_config() {
         # Backup current config directory
         mv "$HOME/.config/zsh" "$HOME/.config/zsh.bak.$(date +%Y%m%d%H%M%S)"
         print_color "✓ Current Zsh config directory backed up" "$GREEN"
-        
-        # Create new config directory
-        mkdir -p "$HOME/.config/zsh"
-        print_color "✓ New Zsh config directory created" "$GREEN"
     fi
+    
+    # Create new config directory
+    mkdir -p "$HOME/.config/zsh/scripts"
+    print_color "✓ New Zsh config directory created" "$GREEN"
     
     # Copy new configuration files
     cp -r .config/zsh/* "$HOME/.config/zsh/"
     print_color "✓ New configuration files copied" "$GREEN"
+    
+    # Ensure scripts are executable
+    chmod -R +x "$HOME/.config/zsh/scripts"
+    print_color "✓ Script permissions set" "$GREEN"
     
     # Update .zshrc
     cp .config/zsh/.zshrc "$HOME/.zshrc"
@@ -118,6 +142,9 @@ update_antigen
 
 # Update Zsh configuration
 update_zsh_config
+
+# Fix permissions
+fix_permissions
 
 print_color "\nUpdate completed successfully!" "$GREEN"
 print_color "Please restart your terminal or run 'exec zsh' to apply changes." "$YELLOW" 
