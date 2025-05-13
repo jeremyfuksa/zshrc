@@ -12,6 +12,46 @@ print_color() {
     echo -e "${2}${1}${NC}"
 }
 
+# Detect OS and package manager
+detect_os() {
+    case "$(uname)" in
+        "Darwin")
+            OS_NAME="macOS"
+            PKG_MANAGER="brew"
+            ;;
+        "Linux")
+            if [ -f /etc/os-release ]; then
+                . /etc/os-release
+                OS_NAME="$NAME"
+                case "$ID" in
+                    "ubuntu"|"debian")
+                        PKG_MANAGER="apt"
+                        ;;
+                    "fedora")
+                        PKG_MANAGER="dnf"
+                        ;;
+                    "centos"|"rhel")
+                        PKG_MANAGER="yum"
+                        ;;
+                    "arch"|"manjaro")
+                        PKG_MANAGER="pacman"
+                        ;;
+                    *)
+                        PKG_MANAGER="unknown"
+                        ;;
+                esac
+            else
+                OS_NAME="Unknown Linux"
+                PKG_MANAGER="unknown"
+            fi
+            ;;
+        *)
+            OS_NAME="Unknown"
+            PKG_MANAGER="unknown"
+            ;;
+    esac
+}
+
 # Check if running as root
 if [ "$EUID" -eq 0 ]; then
     print_color "Please do not run as root" "$RED"
@@ -39,9 +79,65 @@ backup_config() {
     print_color "Backup created in $backup_dir" "$GREEN"
 }
 
+# Check dependencies
+check_dependencies() {
+    local missing_deps=()
+    
+    # Check for git
+    if ! command -v git >/dev/null 2>&1; then
+        missing_deps+=("git")
+    fi
+    
+    # Check for curl
+    if ! command -v curl >/dev/null 2>&1; then
+        missing_deps+=("curl")
+    fi
+    
+    # Check for zsh
+    if ! command -v zsh >/dev/null 2>&1; then
+        missing_deps+=("zsh")
+    fi
+    
+    # If any dependencies are missing, try to install them
+    if [ ${#missing_deps[@]} -gt 0 ]; then
+        print_color "Missing dependencies: ${missing_deps[*]}" "$YELLOW"
+        print_color "Attempting to install missing dependencies..." "$BLUE"
+        
+        case "$PKG_MANAGER" in
+            "brew")
+                brew install "${missing_deps[@]}"
+                ;;
+            "apt")
+                sudo apt update && sudo apt install -y "${missing_deps[@]}"
+                ;;
+            "dnf")
+                sudo dnf install -y "${missing_deps[@]}"
+                ;;
+            "yum")
+                sudo yum install -y "${missing_deps[@]}"
+                ;;
+            "pacman")
+                sudo pacman -S --noconfirm "${missing_deps[@]}"
+                ;;
+            *)
+                print_color "Could not install dependencies automatically. Please install them manually:" "$RED"
+                print_color "${missing_deps[*]}" "$RED"
+                exit 1
+                ;;
+        esac
+    fi
+}
+
 # Update function
 update_zsh() {
     local zsh_dir="$HOME/.config/zsh"
+    
+    # Detect OS and package manager
+    detect_os
+    print_color "Detected OS: $OS_NAME" "$BLUE"
+    
+    # Check dependencies
+    check_dependencies
     
     # Check if we're in the right directory
     if [ ! -d "$zsh_dir" ]; then
@@ -71,6 +167,25 @@ update_zsh() {
         print_color "Installation failed" "$RED"
         exit 1
     fi
+    
+    # Update platform-specific configurations
+    case "$OS_NAME" in
+        "macOS")
+            # Update Homebrew packages if needed
+            if command -v brew >/dev/null 2>&1; then
+                print_color "Updating Homebrew packages..." "$BLUE"
+                brew update && brew upgrade
+            fi
+            ;;
+        "Ubuntu"|"Debian GNU/Linux")
+            # Update apt packages if needed
+            print_color "Updating system packages..." "$BLUE"
+            sudo apt update && sudo apt upgrade -y
+            ;;
+        *)
+            print_color "Note: Automatic package updates not configured for $OS_NAME" "$YELLOW"
+            ;;
+    esac
     
     print_color "\nUpdate complete! 🎉" "$GREEN"
     print_color "Please restart your terminal or run 'source ~/.zshrc' to apply changes." "$YELLOW"
