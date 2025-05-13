@@ -79,6 +79,9 @@ if [[ -f ~/.config/zsh/local.zsh ]]; then
     source_file ~/.config/zsh/local.zsh
 fi
 
+# Add scripts directory to PATH
+export PATH="$HOME/.config/zsh/scripts:$PATH"
+
 # Analytics integration
 if [[ -f ~/.config/zsh/scripts/zsh-analytics ]]; then
     # Log shell startup time
