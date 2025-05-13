@@ -2,8 +2,8 @@
 # -------------------
 
 # Set default editor
-export EDITOR='vim'
-export VISUAL='vim'
+export EDITOR='nano'
+export VISUAL='nano'
 
 # Set language
 export LANG='en_US.UTF-8'
