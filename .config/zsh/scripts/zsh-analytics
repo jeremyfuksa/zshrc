@@ -23,32 +23,38 @@ mkdir -p "$ANALYTICS_DIR"
 
 # Log command execution
 log_command() {
+    # Silently fail if command is empty
+    [[ -z "$1" ]] && return 0
+    
     local timestamp=$(date +"%Y-%m-%d %H:%M:%S")
     local command="$1"
-    local exit_code="$2"
+    local exit_code="${2:-0}"
     local pwd="$PWD"
-    echo "$timestamp|$command|$exit_code|$pwd" >> "$LOG_FILE"
+    echo "$timestamp|$command|$exit_code|$pwd" >> "$LOG_FILE" 2>/dev/null || true
 }
 
 # Log shell startup time
 log_shell_startup() {
+    [[ -z "$1" ]] && return 0
     local timestamp=$(date +"%Y-%m-%d %H:%M:%S")
     local startup_time="$1"
-    echo "$timestamp|$startup_time" >> "$SHELL_STARTUP_LOG"
+    echo "$timestamp|$startup_time" >> "$SHELL_STARTUP_LOG" 2>/dev/null || true
 }
 
 # Log alias usage
 log_alias_usage() {
+    [[ -z "$1" ]] && return 0
     local timestamp=$(date +"%Y-%m-%d %H:%M:%S")
     local alias="$1"
-    echo "$timestamp|$alias" >> "$ALIAS_USAGE_LOG"
+    echo "$timestamp|$alias" >> "$ALIAS_USAGE_LOG" 2>/dev/null || true
 }
 
 # Log directory usage
 log_directory_usage() {
+    [[ -z "$1" ]] && return 0
     local timestamp=$(date +"%Y-%m-%d %H:%M:%S")
     local directory="$1"
-    echo "$timestamp|$directory" >> "$DIRECTORY_LOG"
+    echo "$timestamp|$directory" >> "$DIRECTORY_LOG" 2>/dev/null || true
 }
 
 # Analyze usage patterns
@@ -163,8 +169,7 @@ main() {
     case "$1" in
         "log")
             if [ -z "$2" ]; then
-                echo "Usage: zsh-analytics log <command>"
-                return 1
+                return 0
             fi
             log_command "$2" "$3"
             ;;
@@ -179,24 +184,19 @@ main() {
             ;;
         "clean")
             if [ -f "$LOG_FILE" ]; then
-                mv "$LOG_FILE" "${LOG_FILE}.$(date +%Y%m%d%H%M%S)"
-                echo "Log file archived."
+                mv "$LOG_FILE" "${LOG_FILE}.$(date +%Y%m%d%H%M%S)" 2>/dev/null || true
             fi
             if [ -f "$ANALYSIS_FILE" ]; then
-                mv "$ANALYSIS_FILE" "${ANALYSIS_FILE}.$(date +%Y%m%d%H%M%S)"
-                echo "Analysis file archived."
+                mv "$ANALYSIS_FILE" "${ANALYSIS_FILE}.$(date +%Y%m%d%H%M%S)" 2>/dev/null || true
             fi
             if [ -f "$SHELL_STARTUP_LOG" ]; then
-                mv "$SHELL_STARTUP_LOG" "${SHELL_STARTUP_LOG}.$(date +%Y%m%d%H%M%S)"
-                echo "Shell startup log archived."
+                mv "$SHELL_STARTUP_LOG" "${SHELL_STARTUP_LOG}.$(date +%Y%m%d%H%M%S)" 2>/dev/null || true
             fi
             if [ -f "$ALIAS_USAGE_LOG" ]; then
-                mv "$ALIAS_USAGE_LOG" "${ALIAS_USAGE_LOG}.$(date +%Y%m%d%H%M%S)"
-                echo "Alias usage log archived."
+                mv "$ALIAS_USAGE_LOG" "${ALIAS_USAGE_LOG}.$(date +%Y%m%d%H%M%S)" 2>/dev/null || true
             fi
             if [ -f "$DIRECTORY_LOG" ]; then
-                mv "$DIRECTORY_LOG" "${DIRECTORY_LOG}.$(date +%Y%m%d%H%M%S)"
-                echo "Directory usage log archived."
+                mv "$DIRECTORY_LOG" "${DIRECTORY_LOG}.$(date +%Y%m%d%H%M%S)" 2>/dev/null || true
             fi
             ;;
         *)
@@ -206,8 +206,10 @@ main() {
             echo "  analyze [start_date] [end_date] - Analyze usage patterns"
             echo "  stats                      - Show usage statistics"
             echo "  clean                      - Archive current logs"
+            return 0
             ;;
     esac
 }
 
+# Execute main function with all arguments
 main "$@" 
