@@ -1,0 +1,215 @@
+#!/bin/bash
+
+# Analytics configuration
+ANALYTICS_DIR="$HOME/.local/share/zsh/analytics"
+LOG_FILE="$ANALYTICS_DIR/command_usage.log"
+ANALYSIS_FILE="$ANALYTICS_DIR/analysis.json"
+SHELL_STARTUP_LOG="$ANALYTICS_DIR/shell_startup.log"
+ALIAS_USAGE_LOG="$ANALYTICS_DIR/alias_usage.log"
+DIRECTORY_LOG="$ANALYTICS_DIR/directory_usage.log"
+
+# Custom commands to track
+CUSTOM_COMMANDS=(
+    "sysinfo"
+    "docker-manage"
+    "nginx-manage"
+    "zsh-help"
+    "backup-zsh"
+    "update-all"
+)
+
+# Create analytics directory if it doesn't exist
+mkdir -p "$ANALYTICS_DIR"
+
+# Log command execution
+log_command() {
+    # Silently fail if command is empty
+    [[ -z "$1" ]] && return 0
+    
+    local timestamp=$(date +"%Y-%m-%d %H:%M:%S")
+    local command="$1"
+    local exit_code="${2:-0}"
+    local pwd="$PWD"
+    echo "$timestamp|$command|$exit_code|$pwd" >> "$LOG_FILE" 2>/dev/null || true
+}
+
+# Log shell startup time
+log_shell_startup() {
+    [[ -z "$1" ]] && return 0
+    local timestamp=$(date +"%Y-%m-%d %H:%M:%S")
+    local startup_time="$1"
+    echo "$timestamp|$startup_time" >> "$SHELL_STARTUP_LOG" 2>/dev/null || true
+}
+
+# Log alias usage
+log_alias_usage() {
+    [[ -z "$1" ]] && return 0
+    local timestamp=$(date +"%Y-%m-%d %H:%M:%S")
+    local alias="$1"
+    echo "$timestamp|$alias" >> "$ALIAS_USAGE_LOG" 2>/dev/null || true
+}
+
+# Log directory usage
+log_directory_usage() {
+    [[ -z "$1" ]] && return 0
+    local timestamp=$(date +"%Y-%m-%d %H:%M:%S")
+    local directory="$1"
+    echo "$timestamp|$directory" >> "$DIRECTORY_LOG" 2>/dev/null || true
+}
+
+# Analyze usage patterns
+analyze_usage() {
+    local start_date="$1"
+    local end_date="$2"
+    
+    # Create JSON structure for analysis
+    cat > "$ANALYSIS_FILE" << EOF
+{
+    "analysis_period": {
+        "start": "$start_date",
+        "end": "$end_date"
+    },
+    "command_usage": {
+EOF
+
+    # Analyze custom commands
+    for cmd in "${CUSTOM_COMMANDS[@]}"; do
+        local count=$(grep -c "|$cmd|" "$LOG_FILE")
+        local success_count=$(grep -c "|$cmd|0|" "$LOG_FILE")
+        local failure_count=$((count - success_count))
+        
+        # Add command stats to JSON
+        cat >> "$ANALYSIS_FILE" << EOF
+        "$cmd": {
+            "total_usage": $count,
+            "successful_runs": $success_count,
+            "failed_runs": $failure_count,
+            "success_rate": "$(if [ $count -gt 0 ]; then echo "$((success_count * 100 / count))%"; else echo "N/A"; fi)"
+        },
+EOF
+    done
+
+    # Remove trailing comma and close JSON
+    sed -i '' '$ s/,$//' "$ANALYSIS_FILE"
+    echo "    }," >> "$ANALYSIS_FILE"
+
+    # Add shell startup analysis
+    echo "    \"shell_startup\": {" >> "$ANALYSIS_FILE"
+    local avg_startup=$(awk -F'|' '{sum+=$2} END {print sum/NR}' "$SHELL_STARTUP_LOG" 2>/dev/null)
+    echo "        \"average_time\": \"${avg_startup:-N/A}\"" >> "$ANALYSIS_FILE"
+    echo "    }," >> "$ANALYSIS_FILE"
+
+    # Add directory usage analysis
+    echo "    \"directory_usage\": {" >> "$ANALYSIS_FILE"
+    echo "        \"most_used\": [" >> "$ANALYTICS_FILE"
+    sort "$DIRECTORY_LOG" | uniq -c | sort -nr | head -n 5 | while read -r count dir; do
+        echo "            {\"directory\": \"$dir\", \"count\": $count}," >> "$ANALYSIS_FILE"
+    done
+    sed -i '' '$ s/,$//' "$ANALYSIS_FILE"
+    echo "        ]" >> "$ANALYSIS_FILE"
+    echo "    }," >> "$ANALYSIS_FILE"
+
+    # Add alias usage analysis
+    echo "    \"alias_usage\": {" >> "$ANALYSIS_FILE"
+    echo "        \"most_used\": [" >> "$ANALYSIS_FILE"
+    sort "$ALIAS_USAGE_LOG" | uniq -c | sort -nr | head -n 5 | while read -r count alias; do
+        echo "            {\"alias\": \"$alias\", \"count\": $count}," >> "$ANALYSIS_FILE"
+    done
+    sed -i '' '$ s/,$//' "$ANALYSIS_FILE"
+    echo "        ]" >> "$ANALYSIS_FILE"
+    echo "    }" >> "$ANALYSIS_FILE"
+
+    echo "}" >> "$ANALYSIS_FILE"
+}
+
+# Show usage statistics
+show_stats() {
+    if [ ! -f "$ANALYSIS_FILE" ]; then
+        echo "No analysis data available. Run 'zsh-analytics analyze' first."
+        return 1
+    fi
+
+    echo "📊 ZSH Usage Analysis"
+    echo "===================="
+    
+    # Get analysis period
+    local start_date=$(jq -r '.analysis_period.start' "$ANALYSIS_FILE")
+    local end_date=$(jq -r '.analysis_period.end' "$ANALYSIS_FILE")
+    echo "Period: $start_date to $end_date"
+    echo
+
+    # Show command usage
+    echo "Command Usage Statistics:"
+    echo "------------------------"
+    jq -r '.command_usage | to_entries[] | "\(.key):\n  Total: \(.value.total_usage)\n  Success Rate: \(.value.success_rate)\n"' "$ANALYSIS_FILE"
+
+    # Show shell startup time
+    echo "\nShell Startup Time:"
+    echo "------------------"
+    jq -r '.shell_startup.average_time' "$ANALYSIS_FILE"
+
+    # Show most used directories
+    echo "\nMost Used Directories:"
+    echo "---------------------"
+    jq -r '.directory_usage.most_used[] | "\(.directory): \(.count) times"' "$ANALYSIS_FILE"
+
+    # Show most used aliases
+    echo "\nMost Used Aliases:"
+    echo "-----------------"
+    jq -r '.alias_usage.most_used[] | "\(.alias): \(.count) times"' "$ANALYSIS_FILE"
+
+    # Show recommendations
+    echo "\nRecommendations:"
+    echo "---------------"
+    jq -r '.command_usage | to_entries[] | select(.value.total_usage < 5) | "Consider removing: \(.key) (used \(.value.total_usage) times)"' "$ANALYSIS_FILE"
+}
+
+# Main function
+main() {
+    case "$1" in
+        "log")
+            if [ -z "$2" ]; then
+                return 0
+            fi
+            log_command "$2" "$3"
+            ;;
+        "analyze")
+            local start_date=${2:-$(date -v-30d +"%Y-%m-%d")}
+            local end_date=${3:-$(date +"%Y-%m-%d")}
+            analyze_usage "$start_date" "$end_date"
+            echo "Analysis complete. Run 'zsh-analytics stats' to view results."
+            ;;
+        "stats")
+            show_stats
+            ;;
+        "clean")
+            if [ -f "$LOG_FILE" ]; then
+                mv "$LOG_FILE" "${LOG_FILE}.$(date +%Y%m%d%H%M%S)" 2>/dev/null || true
+            fi
+            if [ -f "$ANALYSIS_FILE" ]; then
+                mv "$ANALYSIS_FILE" "${ANALYSIS_FILE}.$(date +%Y%m%d%H%M%S)" 2>/dev/null || true
+            fi
+            if [ -f "$SHELL_STARTUP_LOG" ]; then
+                mv "$SHELL_STARTUP_LOG" "${SHELL_STARTUP_LOG}.$(date +%Y%m%d%H%M%S)" 2>/dev/null || true
+            fi
+            if [ -f "$ALIAS_USAGE_LOG" ]; then
+                mv "$ALIAS_USAGE_LOG" "${ALIAS_USAGE_LOG}.$(date +%Y%m%d%H%M%S)" 2>/dev/null || true
+            fi
+            if [ -f "$DIRECTORY_LOG" ]; then
+                mv "$DIRECTORY_LOG" "${DIRECTORY_LOG}.$(date +%Y%m%d%H%M%S)" 2>/dev/null || true
+            fi
+            ;;
+        *)
+            echo "Usage: zsh-analytics <command> [args]"
+            echo "Commands:"
+            echo "  log <command> [exit_code]  - Log a command execution"
+            echo "  analyze [start_date] [end_date] - Analyze usage patterns"
+            echo "  stats                      - Show usage statistics"
+            echo "  clean                      - Archive current logs"
+            return 0
+            ;;
+    esac
+}
+
+# Execute main function with all arguments
+main "$@" 
