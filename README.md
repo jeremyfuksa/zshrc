@@ -47,7 +47,7 @@ A blazing fast, beautifully designed, and feature-rich ZSH configuration that co
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/zsh-hot-rod.git ~/.config/zsh
+git clone https://github.com/jeremyfuksa/zshrc.git ~/.config/zsh
 
 # Run the installation script
 cd ~/.config/zsh
