@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/zsh
 
 # Colors
 RED='\033[0;31m'
@@ -17,37 +17,32 @@ get_os_info() {
         os_name=$(sw_vers -productName)
         os_version=$(sw_vers -productVersion)
         os_build=$(sw_vers -buildVersion)
-        echo "${BOLD}${GREEN}🖥️  OS:${NC} $os_name $os_version ($os_build)"
+        print "${BOLD}${GREEN}🖥️  OS:${NC} $os_name $os_version ($os_build)"
     else
         # Linux
-        if [ -f /etc/os-release ]; then
-            . /etc/os-release
-            echo "${BOLD}${GREEN}🖥️  OS:${NC} $NAME $VERSION"
+        if [[ -f /etc/os-release ]]; then
+            source /etc/os-release
+            print "${BOLD}${GREEN}🖥️  OS:${NC} $NAME $VERSION"
         fi
     fi
 }
 
 get_kernel_info() {
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        kernel=$(uname -r)
-        echo "${BOLD}${GREEN}⚙️  Kernel:${NC} $kernel"
-    else
-        kernel=$(uname -r)
-        echo "${BOLD}${GREEN}⚙️  Kernel:${NC} $kernel"
-    fi
+    kernel=$(uname -r)
+    print "${BOLD}${GREEN}⚙️  Kernel:${NC} $kernel"
 }
 
 get_cpu_info() {
     if [[ "$OSTYPE" == "darwin"* ]]; then
         cpu=$(sysctl -n machdep.cpu.brand_string)
         cores=$(sysctl -n hw.ncpu)
-        echo "${BOLD}${GREEN}💻 CPU:${NC} $cpu"
-        echo "${BOLD}${GREEN}🔢 Cores:${NC} $cores"
+        print "${BOLD}${GREEN}💻 CPU:${NC} $cpu"
+        print "${BOLD}${GREEN}🔢 Cores:${NC} $cores"
     else
         cpu=$(grep "model name" /proc/cpuinfo | head -n1 | cut -d':' -f2 | sed 's/^[ \t]*//')
         cores=$(nproc)
-        echo "${BOLD}${GREEN}💻 CPU:${NC} $cpu"
-        echo "${BOLD}${GREEN}🔢 Cores:${NC} $cores"
+        print "${BOLD}${GREEN}💻 CPU:${NC} $cpu"
+        print "${BOLD}${GREEN}🔢 Cores:${NC} $cores"
     fi
 }
 
@@ -55,84 +50,76 @@ get_memory_info() {
     if [[ "$OSTYPE" == "darwin"* ]]; then
         total_mem=$(sysctl -n hw.memsize | awk '{print $0/1024/1024/1024 " GB"}')
         used_mem=$(vm_stat | awk '/active/ {print $3}' | sed 's/\.//')
-        used_mem=$(($used_mem * 4096 / 1024 / 1024 / 1024))
-        free_mem=$((${total_mem%.*} - used_mem))
-        echo "${BOLD}${GREEN}🧠 Memory:${NC} ${free_mem}GB free of ${total_mem}"
+        used_mem=$((used_mem * 4096 / 1024 / 1024 / 1024))
+        free_mem=$((total_mem - used_mem))
+        print "${BOLD}${GREEN}🧠 Memory:${NC} ${free_mem}GB free of ${total_mem}"
     else
         total_mem=$(free -h | awk '/^Mem:/ {print $2}')
         used_mem=$(free -h | awk '/^Mem:/ {print $3}')
         free_mem=$(free -h | awk '/^Mem:/ {print $4}')
-        echo "${BOLD}${GREEN}🧠 Memory:${NC} ${free_mem} free of ${total_mem}"
+        print "${BOLD}${GREEN}🧠 Memory:${NC} ${free_mem} free of ${total_mem}"
     fi
 }
 
 get_disk_info() {
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        disk_info=$(df -h / | tail -n1)
-        total=$(echo "$disk_info" | awk '{print $2}')
-        used=$(echo "$disk_info" | awk '{print $3}')
-        free=$(echo "$disk_info" | awk '{print $4}')
-        echo "${BOLD}${GREEN}💾 Disk:${NC} ${free} free of ${total}"
-    else
-        disk_info=$(df -h / | tail -n1)
-        total=$(echo "$disk_info" | awk '{print $2}')
-        used=$(echo "$disk_info" | awk '{print $3}')
-        free=$(echo "$disk_info" | awk '{print $4}')
-        echo "${BOLD}${GREEN}💾 Disk:${NC} ${free} free of ${total}"
-    fi
+    disk_info=$(df -h / | tail -n1)
+    total=$(echo "$disk_info" | awk '{print $2}')
+    used=$(echo "$disk_info" | awk '{print $3}')
+    free=$(echo "$disk_info" | awk '{print $4}')
+    print "${BOLD}${GREEN}💾 Disk:${NC} ${free} free of ${total}"
 }
 
 get_uptime() {
     uptime=$(uptime | sed 's/.*up \([^,]*\), .*/\1/')
-    echo "${BOLD}${GREEN}⏱️  Uptime:${NC} $uptime"
+    print "${BOLD}${GREEN}⏱️  Uptime:${NC} $uptime"
 }
 
 get_shell_info() {
-    echo "${BOLD}${GREEN}🐚 Shell:${NC} $SHELL"
-    echo "${BOLD}${GREEN}🖥️  Terminal:${NC} $TERM"
+    print "${BOLD}${GREEN}🐚 Shell:${NC} $SHELL"
+    print "${BOLD}${GREEN}🖥️  Terminal:${NC} $TERM"
 }
 
 get_network_info() {
     if [[ "$OSTYPE" == "darwin"* ]]; then
         local_ip=$(ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr en1 2>/dev/null)
-        if [ -z "$local_ip" ]; then
+        if [[ -z "$local_ip" ]]; then
             local_ip="Not connected"
         fi
     else
         local_ip=$(hostname -I | awk '{print $1}')
-        if [ -z "$local_ip" ]; then
+        if [[ -z "$local_ip" ]]; then
             local_ip="Not connected"
         fi
     fi
-    echo "${BOLD}${GREEN}🌐 Local IP:${NC} $local_ip"
+    print "${BOLD}${GREEN}🌐 Local IP:${NC} $local_ip"
 }
 
 # Print system information
-echo -e "\n${BOLD}${CYAN}✨ System Dashboard ✨${NC}"
-echo -e "${BOLD}${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
+print "\n${BOLD}${CYAN}✨ System Dashboard ✨${NC}"
+print "${BOLD}${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
 
 # System Information
-echo -e "${BOLD}${YELLOW}📋 System Information${NC}"
-echo -e "$(get_os_info)"
-echo -e "$(get_kernel_info)"
-echo -e "$(get_uptime)"
-echo
+print "${BOLD}${YELLOW}📋 System Information${NC}"
+get_os_info
+get_kernel_info
+get_uptime
+print
 
 # Hardware Information
-echo -e "${BOLD}${YELLOW}🔧 Hardware Information${NC}"
-echo -e "$(get_cpu_info)"
-echo -e "$(get_memory_info)"
-echo -e "$(get_disk_info)"
-echo
+print "${BOLD}${YELLOW}🔧 Hardware Information${NC}"
+get_cpu_info
+get_memory_info
+get_disk_info
+print
 
 # Network Information
-echo -e "${BOLD}${YELLOW}🌐 Network Information${NC}"
-echo -e "$(get_network_info)"
-echo
+print "${BOLD}${YELLOW}🌐 Network Information${NC}"
+get_network_info
+print
 
 # Shell Information
-echo -e "${BOLD}${YELLOW}🐚 Shell Information${NC}"
-echo -e "$(get_shell_info)"
-echo
+print "${BOLD}${YELLOW}🐚 Shell Information${NC}"
+get_shell_info
+print
 
-echo -e "${BOLD}${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n" 
+print "${BOLD}${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n" 
