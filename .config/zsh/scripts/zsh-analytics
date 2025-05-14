@@ -1,4 +1,14 @@
-#!/bin/bash
+#!/bin/zsh
+
+# ... (rest of the code remains the same)
+
+# Check if jq is available
+if ! command -v jq &> /dev/null; then
+    echo "jq is not installed. Please install it to use this script."
+    exit 1
+fi
+
+# ... (rest of the code remains the same)#!/bin/bash
 
 # Analytics configuration
 ANALYTICS_DIR="$HOME/.local/share/zsh/analytics"
